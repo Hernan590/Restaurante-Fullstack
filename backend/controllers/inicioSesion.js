@@ -7,16 +7,17 @@ async function validateUser(req, res) {
   const password = req.header('Authorization').replace('Bearer ', '');
 
   try {
-    const user = await db.oneOrNone(
-      'SELECT * FROM users WHERE username = $1 AND password = $2',
+    // Ejecuta la consulta
+    const [rows] = await db.query(
+      'SELECT * FROM users WHERE username = ? AND password = ?',
       [username, password]
     );
 
-    if (user) {
-      // Si se encuentra el usuario y la contraseña coincide, devuelve una respuesta exitosa
-      res.json(user);
+    if (rows.length > 0) {
+      // Si se encuentra el usuario, devuelve el resultado
+      res.json(rows[0]);
     } else {
-      // Si no se encuentra el usuario o la contraseña no coincide, devuelve una respuesta de error
+      // Si no se encuentra el usuario o la contraseña no coincide
       res.status(401).json({ error: 'Autenticación fallida' });
     }
   } catch (error) {
@@ -27,6 +28,6 @@ async function validateUser(req, res) {
 }
 
 module.exports = {
-    validateUser,
-  };
-  
+  validateUser,
+};
+

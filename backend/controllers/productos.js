@@ -1,10 +1,9 @@
 const db = require('../conexion/db'); 
-const fs = require('fs').promises;
-const path = require('path');
 
+// Obtener todos los productos
 async function getAllProduct(req, res) {
   try {
-    const products = await db.any('SELECT * FROM product')
+    const [products] = await db.query('SELECT * FROM product');
     res.json(products);
   } catch (error) {
     console.error('Error al obtener la lista de productos', error);
@@ -12,18 +11,19 @@ async function getAllProduct(req, res) {
   }
 }
 
+// Crear un nuevo producto
 async function createProducto(req, res) {
   const { productname, price } = req.body;
 
   try {
-    // Ejemplo de consulta SQL para insertar un nuevo producto
+    // Consulta SQL para insertar un nuevo producto
     const query = `
       INSERT INTO product (productname, price)
-      VALUES ($1, $2)
+      VALUES (?, ?)
     `;
 
     // Ejecutar la consulta SQL
-    await db.none(query, [productname, price]);
+    await db.query(query, [productname, price]);
 
     res.json({ success: true });
   } catch (error) {
@@ -32,21 +32,21 @@ async function createProducto(req, res) {
   }
 }
 
+// Eliminar un producto
 async function deleteProduct(req, res) {
   const id = req.params.id;
 
   try {
-    // Ejemplo de consulta SQL para eliminar un usuario por su nombre de usuario
+    // Consulta SQL para eliminar un producto por ID
     const query = `
       DELETE FROM product
-      WHERE id = $1
+      WHERE id = ?
     `;
 
     // Ejecutar la consulta SQL
-    await db.none(query, [id]);
+    await db.query(query, [id]);
 
     console.log('Producto eliminado con éxito');
-
     res.json({ success: true });
   } catch (error) {
     console.error('Error al eliminar el producto', error);
@@ -54,19 +54,20 @@ async function deleteProduct(req, res) {
   }
 }
 
+// Editar un producto
 async function editProduct(req, res) {
-  const { id, productname, price} = req.body;
+  const { id, productname, price } = req.body;
 
   try {
-    // Ejemplo de consulta SQL para editar un usuario por su identificación
+    // Consulta SQL para editar un producto
     const query = `
       UPDATE product
-      SET productname = $2, price = $3
-      WHERE id = $1
+      SET productname = ?, price = ?
+      WHERE id = ?
     `;
 
     // Ejecutar la consulta SQL
-    await db.none(query, [id, productname, price]);
+    await db.query(query, [productname, price, id]);
 
     res.json({ success: true });
   } catch (error) {
@@ -76,9 +77,8 @@ async function editProduct(req, res) {
 }
 
 module.exports = {
-    getAllProduct,
-    createProducto,
-    deleteProduct,
-    editProduct,
-  };
-  
+  getAllProduct,
+  createProducto,
+  deleteProduct,
+  editProduct,
+};

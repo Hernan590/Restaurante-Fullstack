@@ -1,10 +1,9 @@
 const db = require('../conexion/db'); 
-const fs = require('fs').promises;
-const path = require('path');
 
+// Obtener todos los usuarios
 async function getAllUsers(req, res) {
   try {
-    const users = await db.any('SELECT * FROM users');
+    const [users] = await db.query('SELECT * FROM users');
     res.json(users);
   } catch (error) {
     console.error('Error al obtener usuarios', error);
@@ -12,18 +11,19 @@ async function getAllUsers(req, res) {
   }
 }
 
+// Crear un nuevo usuario
 async function createUser(req, res) {
   const { username, password, id, age, role } = req.body;
 
   try {
-    // Ejemplo de consulta SQL para insertar un nuevo usuario
+    // Consulta SQL para insertar un nuevo usuario
     const query = `
       INSERT INTO users (id, username, password, age, role)
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
     // Ejecutar la consulta SQL
-    await db.none(query, [id, username, password, age, role]);
+    await db.query(query, [id, username, password, age, role]);
 
     res.json({ success: true });
   } catch (error) {
@@ -32,21 +32,21 @@ async function createUser(req, res) {
   }
 }
 
+// Eliminar un usuario
 async function deleteUser(req, res) {
   const id = req.params.id;
 
   try {
-    // Ejemplo de consulta SQL para eliminar un usuario por su nombre de usuario
+    // Consulta SQL para eliminar un usuario por ID
     const query = `
       DELETE FROM users
-      WHERE id = $1
+      WHERE id = ?
     `;
 
     // Ejecutar la consulta SQL
-    await db.none(query, [id]);
+    await db.query(query, [id]);
 
     console.log('Usuario eliminado con éxito');
-
     res.json({ success: true });
   } catch (error) {
     console.error('Error al eliminar el usuario', error);
@@ -54,19 +54,20 @@ async function deleteUser(req, res) {
   }
 }
 
+// Editar un usuario
 async function editUser(req, res) {
   const { id, username, password, age, role } = req.body;
 
   try {
-    // Ejemplo de consulta SQL para editar un usuario por su identificación
+    // Consulta SQL para editar un usuario
     const query = `
       UPDATE users
-      SET username = $2, password = $3, age = $4, role = $5
-      WHERE id = $1
+      SET username = ?, password = ?, age = ?, role = ?
+      WHERE id = ?
     `;
 
     // Ejecutar la consulta SQL
-    await db.none(query, [id, username, password, age, role]);
+    await db.query(query, [username, password, age, role, id]);
 
     res.json({ success: true });
   } catch (error) {
